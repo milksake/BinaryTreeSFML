@@ -24,6 +24,13 @@ void BinaryTree::Print()
     std::cout << "\n\n";
 }
 
+std::string BinaryTree::POString()
+{
+    std::string s;
+    PostOrder([&s](Node* n) { s.append(n->value); s.append(" "); });
+    return s;
+}
+
 void BinaryTree::Evaluate()
 {
 }

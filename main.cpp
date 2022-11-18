@@ -11,7 +11,7 @@ void createShapes(BinaryTree& t, std::vector<sf::CircleShape>& circles, std::vec
 
     std::function<void(Node*, int, int)> l = [&](Node* n, int lvl, int i) {
         auto posX = width * i / pow(2, lvl + 1);
-        auto posY = 50 + lvl * 95;
+        auto posY = 70 + lvl * 95;
 
         if (n != t.root)
             vertex.append(sf::Vertex(sf::Vector2f(posX, posY)));
@@ -49,16 +49,15 @@ void createShapes(BinaryTree& t, std::vector<sf::CircleShape>& circles, std::vec
 int main()
 {
     int wWidth = 1310;
-    int wHeight = 610;
+    int wHeight = 630;
 
     //Creating a Window
-    sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Binary Trees from algebraic expressions");
+    sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Binary Trees from arithmetic expressions");
     window.setFramerateLimit(60);
 
     //Creating a Tree
     //BinaryTree t("((12+5)*7-6*11+3)*8");
     BinaryTree t("(12 + 5) * 7 - 6 * (11 + 3) * 8");
-    t.Print();
 
     //Creating circles, lines and strings
     std::vector<sf::CircleShape> circles;
@@ -68,6 +67,15 @@ int main()
     sf::VertexArray vertex(sf::Lines);
 
     createShapes(t, circles, strings, font, vertex, wWidth);
+
+    //Text
+    sf::Text postOrder(t.POString(), font, 30);
+    postOrder.setPosition(sf::Vector2f(0, 0));
+
+    bool keyboardMode = false;
+
+    sf::Text inputText("Press SPACE to change the expression", font, 30);
+    inputText.setPosition(sf::Vector2f(0, wHeight - 40));
 
     //Main loop
     while (window.isOpen())
@@ -85,16 +93,29 @@ int main()
             {
                 //std::cout << "Key pressed: " << event.key.code << '\n';
                 
-                //If the key pressed is escape
-                if (event.key.code == sf::Keyboard::Escape)
+                //If the key pressed is space
+                if (event.key.code == sf::Keyboard::Space)
                 {
-                    std::string s;
-                    std::cout << "Enter a new expression:\n";
-                    std::cin >> s;
-                    t.Update(s);
+                    keyboardMode = true;
+                    inputText.setString("");
+                }
+                if (event.key.code == sf::Keyboard::Enter)
+                {
+                    keyboardMode = false;
+                    t.Update(inputText.getString());
                     createShapes(t, circles, strings, font, vertex, wWidth);
-                    std::cout << '\n';
-                    t.Print();
+                    postOrder.setString(t.POString());
+                }
+            }
+
+            if (keyboardMode && event.type == sf::Event::TextEntered)
+            {
+                if (40 <= event.text.unicode && event.text.unicode <= 57 && event.text.unicode != 46 && event.text.unicode != 44)
+                    inputText.setString(inputText.getString() + static_cast<char>(event.text.unicode));
+                else if (event.text.unicode == 8)
+                {
+                    auto s = inputText.getString();
+                    inputText.setString(s.substring(0, s.getSize() - 1));
                 }
             }
         }
@@ -102,6 +123,8 @@ int main()
         //Drawing on the screen
         window.clear();                 //clears the screen (color)
         
+        window.draw(postOrder);
+
         window.draw(vertex);
 
         for (auto circle : circles)
@@ -114,6 +137,8 @@ int main()
             //Draws the objects created
             window.draw(string);
         }
+
+        window.draw(inputText);
 
         //Displays the screen
         window.display();

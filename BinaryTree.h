@@ -17,6 +17,7 @@ public:
     BinaryTree(std::string expression);
     ~BinaryTree();
     void Print();
+    std::string POString();
     void Evaluate();
     void PostOrder(std::function<void(Node*)> f);
     void PostOrder(std::function<void(Node*)> f, Node* x);
